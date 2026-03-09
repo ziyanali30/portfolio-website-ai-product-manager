@@ -9,9 +9,9 @@ import "./globals.css"
 import { Toaster } from "sonner"
 
 export const metadata: Metadata = {
-  title: "Umang Thakkar - AI Product Manager",
+  title: "Ziyan Ali Murtaza - GenAI Engineer",
   description:
-    "AI Product Manager focused on data-driven growth and user delight. 6+ years shipping products that scale.",
+    "GenAI Engineer specializing in LLM systems, RAG pipelines, multi-agent systems, and production-grade AI infrastructure.",
   generator: "v0.app",
 }
 

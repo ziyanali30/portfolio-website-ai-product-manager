@@ -177,7 +177,7 @@ export function ContactSection() {
     } catch (err) {
       console.error("Contact form error:", err)
       if (!shouldReduceMotion) play("error")
-      showErrorToast("Please try again or email me directly at umangthakkar005@gmail.com.")
+      showErrorToast("Please try again or email me directly at ziyanali6@gmail.com.")
     } finally {
       setIsSubmitting(false)
     }
@@ -204,8 +204,8 @@ export function ContactSection() {
                 onClick={() => {
                   if (!shouldReduceMotion) play("click")
                   const subject = encodeURIComponent("Hello from your portfolio")
-                  const body = encodeURIComponent("Hi Umang,\n\nI'd like to discuss...")
-                  window.location.href = `mailto:umangthakkar005@gmail.com?subject=${subject}&body=${body}`
+                  const body = encodeURIComponent("Hi Ziyan,\n\nI'd like to discuss...")
+                  window.location.href = `mailto:ziyanali6@gmail.com?subject=${subject}&body=${body}`
                 }}
                   className="flex items-center gap-4 w-full justify-start p-6 h-auto bg-transparent border border-border rounded-lg hover:bg-accent transition-colors"
                 >
@@ -220,7 +220,7 @@ export function ContactSection() {
               {/* WhatsApp */}
               <AnimatedCard variant="all" className="w-full">
                 <a
-                  href="https://wa.me/919426154668"
+                  href="https://wa.me/923324974815"
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => {

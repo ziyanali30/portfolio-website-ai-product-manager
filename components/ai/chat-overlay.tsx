@@ -12,6 +12,7 @@ import { useSpeechInput } from "@/hooks/use-speech-input"
 import { motion, AnimatePresence } from "framer-motion"
 import { useSound } from "@/hooks/use-sound"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
+import { readSSEStream } from "@/lib/ai/stream-reader"
 
 interface Message {
   role: "user" | "assistant"
@@ -27,10 +28,10 @@ interface ChatOverlayProps {
 }
 
 const STARTER_QUESTIONS = [
-  "What did Umang work on at Hunch?",
-  "Tell me about Umang's journey and career decisions",
-  "What technical projects has Umang built?",
-  "What skills has Umang developed from his experiences?",
+  "What does Ziyan work on at Texagon?",
+  "Tell me about Ziyan's experience with RAG systems",
+  "What AI projects has Ziyan built?",
+  "What skills does Ziyan bring as a GenAI engineer?",
 ]
 
 export function ChatOverlay({ open, onClose, initialQuery }: ChatOverlayProps) {
@@ -107,6 +108,12 @@ export function ChatOverlay({ open, onClose, initialQuery }: ChatOverlayProps) {
             setIsLoading(true)
             setSuggestedQuestions([])
 
+          const assistantMessageId = getNextMessageId()
+          let fullText = ""
+
+          // Add empty assistant message that we'll stream into
+          setMessages((prev) => [...prev, { role: "assistant", content: "", id: assistantMessageId }])
+
           fetch("/api/ai/query", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -117,68 +124,44 @@ export function ChatOverlay({ open, onClose, initialQuery }: ChatOverlayProps) {
           })
             .then(async (response) => {
               if (!response.ok) {
-                // Try to get error details from response
                 const errorData = await response.json().catch(() => ({}))
-                const error = new Error(errorData.message || `API error: ${response.status}`) as Error & { response?: Response, errorData?: any }
-                error.response = response
-                error.errorData = errorData
-                throw error
+                throw new Error(errorData.message || `API error: ${response.status}`)
               }
-              return response.json()
-            })
-            .then((data) => {
-              const assistantMessageId = getNextMessageId()
-              const assistantMessage: Message = {
-                role: "assistant",
-                content: data.answer,
-                sources: data.sources,
-                id: assistantMessageId,
-              }
-              setMessages((prev) => [...prev, assistantMessage])
-              setConversationHistory((prev) => [
-                ...prev,
-                { role: "user" as const, content: queryText },
-                { role: "assistant" as const, content: data.answer },
-              ])
-              if (data.suggestedQuestions && data.suggestedQuestions.length > 0) {
-                setSuggestedQuestions(data.suggestedQuestions)
-              }
+
+              await readSSEStream(response, {
+                onChunk: (content) => {
+                  fullText += content
+                  setMessages((prev) =>
+                    prev.map((m) =>
+                      m.id === assistantMessageId ? { ...m, content: fullText } : m
+                    )
+                  )
+                },
+                onDone: (sq) => {
+                  if (sq.length > 0) setSuggestedQuestions(sq)
+                  setConversationHistory((prev) => [
+                    ...prev,
+                    { role: "user" as const, content: queryText },
+                    { role: "assistant" as const, content: fullText },
+                  ])
+                },
+                onError: (msg) => {
+                  setMessages((prev) =>
+                    prev.map((m) =>
+                      m.id === assistantMessageId ? { ...m, content: msg } : m
+                    )
+                  )
+                },
+              })
             })
             .catch((error) => {
               console.error("Error sending message:", error)
-              const errorMessageId = getNextMessageId()
-              
-              // Extract error details
-              let errorContent = "Sorry, I encountered an error. Please try again."
-              let errorSuggestion = ""
-              
-              // Check if error has errorData attached (from our custom error)
-              if (error && typeof error === 'object' && 'errorData' in error) {
-                const errorData = (error as any).errorData
-                if (errorData.message) {
-                  errorContent = errorData.message
-                }
-                if (errorData.suggestion) {
-                  errorSuggestion = errorData.suggestion
-                }
-              } else if (error instanceof Error) {
-                // Check if error message contains moderation info
-                if (error.message.includes('moderation') || error.message.includes('flagged')) {
-                  errorContent = error.message
-                  errorSuggestion = "Please try rephrasing your question. This appears to be a false positive from the AI model's content moderation."
-                } else {
-                  errorContent = error.message
-                }
-              }
-              
-              const errorMessage: Message = {
-                role: "assistant",
-                content: errorSuggestion 
-                  ? `${errorContent}\n\n💡 ${errorSuggestion}`
-                  : errorContent,
-                id: errorMessageId,
-              }
-              setMessages((prev) => [...prev, errorMessage])
+              const errorContent = error instanceof Error ? error.message : "Sorry, I encountered an error. Please try again."
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === assistantMessageId ? { ...m, content: errorContent } : m
+                )
+              )
             })
             .finally(() => {
               setIsLoading(false)
@@ -221,6 +204,10 @@ export function ChatOverlay({ open, onClose, initialQuery }: ChatOverlayProps) {
         setIsLoading(true)
         setSuggestedQuestions([])
 
+        const assistantMessageId = getNextMessageId()
+        let fullText = ""
+        setMessages((prev) => [...prev, { role: "assistant", content: "", id: assistantMessageId }])
+
         try {
           const response = await fetch("/api/ai/query", {
             method: "POST",
@@ -235,39 +222,40 @@ export function ChatOverlay({ open, onClose, initialQuery }: ChatOverlayProps) {
             throw new Error(`API error: ${response.status}`)
           }
 
-          const data = await response.json()
-
-          // Add AI response to UI
-          const assistantMessageId = getNextMessageId()
-          const assistantMessage: Message = {
-            role: "assistant",
-            content: data.answer,
-            sources: data.sources,
-            id: assistantMessageId,
-          }
-          setMessages((prev) => [...prev, assistantMessage])
-
-          // Update conversation history
-          const updatedHistory = [
-            ...newHistory,
-            { role: "user" as const, content: queryText },
-            { role: "assistant" as const, content: data.answer },
-          ]
-          setConversationHistory(updatedHistory)
-
-          // Update suggested questions
-          if (data.suggestedQuestions && data.suggestedQuestions.length > 0) {
-            setSuggestedQuestions(data.suggestedQuestions)
-          }
+          await readSSEStream(response, {
+            onChunk: (content) => {
+              fullText += content
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === assistantMessageId ? { ...m, content: fullText } : m
+                )
+              )
+            },
+            onDone: (sq) => {
+              if (sq.length > 0) setSuggestedQuestions(sq)
+              setConversationHistory([
+                ...newHistory,
+                { role: "user" as const, content: queryText },
+                { role: "assistant" as const, content: fullText },
+              ])
+            },
+            onError: (msg) => {
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === assistantMessageId ? { ...m, content: msg } : m
+                )
+              )
+            },
+          })
         } catch (error) {
           console.error("Error regenerating message:", error)
-          const errorMessageId = getNextMessageId()
-          const errorMessage: Message = {
-            role: "assistant",
-            content: "Sorry, I encountered an error. Please try again.",
-            id: errorMessageId,
-          }
-          setMessages((prev) => [...prev, errorMessage])
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMessageId
+                ? { ...m, content: "Sorry, I encountered an error. Please try again." }
+                : m
+            )
+          )
         } finally {
           setIsLoading(false)
         }
@@ -304,8 +292,11 @@ export function ChatOverlay({ open, onClose, initialQuery }: ChatOverlayProps) {
     setIsLoading(true)
     setSuggestedQuestions([])
 
+    const assistantMessageId = getNextMessageId()
+    let fullText = ""
+    setMessages((prev) => [...prev, { role: "assistant", content: "", id: assistantMessageId }])
+
     try {
-      // Call API
       const response = await fetch("/api/ai/query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -319,39 +310,40 @@ export function ChatOverlay({ open, onClose, initialQuery }: ChatOverlayProps) {
         throw new Error(`API error: ${response.status}`)
       }
 
-      const data = await response.json()
-
-      // Add AI response to UI
-      const assistantMessageId = getNextMessageId()
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: data.answer,
-        sources: data.sources,
-        id: assistantMessageId,
-      }
-      setMessages((prev) => [...prev, assistantMessage])
-
-      // Update conversation history
-      const updatedHistory = [
-        ...conversationHistory,
-        { role: "user" as const, content: finalQueryText },
-        { role: "assistant" as const, content: data.answer },
-      ]
-      setConversationHistory(updatedHistory)
-
-      // Update suggested questions
-      if (data.suggestedQuestions && data.suggestedQuestions.length > 0) {
-        setSuggestedQuestions(data.suggestedQuestions)
-      }
+      await readSSEStream(response, {
+        onChunk: (content) => {
+          fullText += content
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMessageId ? { ...m, content: fullText } : m
+            )
+          )
+        },
+        onDone: (sq) => {
+          if (sq.length > 0) setSuggestedQuestions(sq)
+          setConversationHistory((prev) => [
+            ...prev,
+            { role: "user" as const, content: finalQueryText },
+            { role: "assistant" as const, content: fullText },
+          ])
+        },
+        onError: (msg) => {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMessageId ? { ...m, content: msg } : m
+            )
+          )
+        },
+      })
     } catch (error) {
       console.error("Error sending message:", error)
-      const errorMessageId = getNextMessageId()
-      const errorMessage: Message = {
-        role: "assistant",
-        content: "Sorry, I encountered an error. Please try again.",
-        id: errorMessageId,
-      }
-      setMessages((prev) => [...prev, errorMessage])
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantMessageId
+            ? { ...m, content: "Sorry, I encountered an error. Please try again." }
+            : m
+        )
+      )
     } finally {
       setIsLoading(false)
     }
@@ -430,7 +422,7 @@ export function ChatOverlay({ open, onClose, initialQuery }: ChatOverlayProps) {
             <div>
               <h1 className="text-lg font-semibold">AI Companion</h1>
               <p className="text-sm text-muted-foreground">
-                Ask me anything about Umang
+                Ask me anything about Ziyan
               </p>
             </div>
           </div>
@@ -488,7 +480,7 @@ export function ChatOverlay({ open, onClose, initialQuery }: ChatOverlayProps) {
               >
                 <h2 className="text-2xl font-semibold">Welcome!</h2>
                 <p className="text-muted-foreground max-w-md">
-                  I'm Umang's AI companion. I can answer questions about his
+                  I'm Ziyan's AI companion. I can answer questions about his
                   experience, projects, skills, and journey. Try asking me
                   something!
                 </p>
@@ -505,7 +497,7 @@ export function ChatOverlay({ open, onClose, initialQuery }: ChatOverlayProps) {
                   <div className="flex items-start gap-2">
                     <span className="text-amber-600 dark:text-amber-400 mt-0.5">⚠️</span>
                     <p className="flex-1">
-                      <strong className="font-medium">Heads up:</strong> Umang's build velocity is intense. I try to stay current, but he often ships quicker than I can index.
+                      <strong className="font-medium">Heads up:</strong> Ziyan ships fast. I try to stay current, but he often builds quicker than I can index.
                     </p>
                   </div>
                 </div>
@@ -562,7 +554,7 @@ export function ChatOverlay({ open, onClose, initialQuery }: ChatOverlayProps) {
             // Chat Messages
             <div className="space-y-4">
               <AnimatePresence>
-                {messages.map((message, idx) => (
+                {messages.filter((m) => m.role === "user" || m.content?.trim()).map((message, idx) => (
                   <motion.div
                     key={message.id ?? idx}
                     initial={{ opacity: 0, y: 10 }}
@@ -581,8 +573,8 @@ export function ChatOverlay({ open, onClose, initialQuery }: ChatOverlayProps) {
                 ))}
               </AnimatePresence>
 
-              {/* Loading Indicator */}
-              {isLoading && (
+              {/* Loading Indicator - hide once streaming content arrives */}
+              {isLoading && !(messages.length > 0 && messages[messages.length - 1].role === "assistant" && messages[messages.length - 1].content?.trim()) && (
                 <div className="flex gap-3">
                   <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center">
                     <Bot className="w-4 h-4 text-muted-foreground" />
@@ -749,7 +741,7 @@ export function ChatOverlay({ open, onClose, initialQuery }: ChatOverlayProps) {
                     ? "Generating response..."
                     : listening
                     ? "Listening..."
-                    : "Ask a question about Umang..."
+                    : "Ask a question about Ziyan..."
                 }
                 disabled={isLoading || listening}
                 className={cn(

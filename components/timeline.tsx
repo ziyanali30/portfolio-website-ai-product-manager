@@ -15,56 +15,24 @@ type TimelineItem = {
   roleId: keyof typeof journeyContent.pm
 }
 
-// Persona-specific titles for 100x Engineers role
-const get100xTitle = (persona: string): string => {
-  switch (persona) {
-    case "pm":
-      return "AI Product Builder"
-    case "consultant":
-      return "AI Automation Consultant"
-    case "builder":
-      return "AI Engineer"
-    default:
-      return "AI Builder"
-  }
-}
-
-const getTimelineItems = (persona: string): TimelineItem[] => [
+const getTimelineItems = (_persona: string): TimelineItem[] => [
   {
-    title: get100xTitle(persona),
-    company: "100x Engineers Cohort",
-    date: "July 2025 – Present",
-    roleId: "100x-engineers",
+    title: "AI Context Engineer",
+    company: "Xperion (Remote)",
+    date: "Jan 2026 – Present",
+    roleId: "xperion",
   },
   {
-    title: "Associate Product Manager",
-    company: "Hunch (Dating & Social App)",
-    date: "Oct 2023 – Jun 2025",
-    roleId: "hunch-apm",
+    title: "AI Engineer (GenAI / Backend Systems)",
+    company: "Texagon",
+    date: "Jan 2024 – Present",
+    roleId: "texagon",
   },
   {
-    title: "Content Strategist",
-    company: "Hunch (Polling App)",
-    date: "Nov 2022 – Sep 2023",
-    roleId: "hunch-content",
-  },
-  {
-    title: "Content Writer",
-    company: "PlotX (Crypto Gaming Platform)",
-    date: "Jun 2022 – Oct 2022",
-    roleId: "plotx",
-  },
-  {
-    title: "Content Writer",
-    company: "iNurture Education Solutions (EdTech)",
-    date: "Feb 2022 – Jun 2022",
-    roleId: "inurture",
-  },
-  {
-    title: "Content Writer",
-    company: "Freelance",
-    date: "Nov 2021 – May 2022",
-    roleId: "freelance",
+    title: "AI Intern",
+    company: "Xavor Corporation",
+    date: "May 2024 – Aug 2024",
+    roleId: "xavor",
   },
 ]
 
@@ -82,7 +50,7 @@ export function Timeline() {
         <ScrollReveal variant="fadeInUp" delay={0.2}>
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">My Journey</h2>
-            <p className="text-lg text-muted-foreground">The path of building, scaling, and reimagining products</p>
+            <p className="text-lg text-muted-foreground">Building production AI systems from day one</p>
           </div>
         </ScrollReveal>
 

@@ -1,11 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { Resend } from "resend"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+let _resend: Resend | null = null
+function getResend() {
+  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY)
+  return _resend
+}
 
 // Optional overrides so you can change without code edits
-const FROM = process.env.RESEND_FROM || "Umang Thakkar <onboarding@resend.dev>"
-const TO = process.env.RESEND_TO || "umangthakkar005@gmail.com"
+const FROM = process.env.RESEND_FROM || "Ziyan Ali Murtaza <onboarding@resend.dev>"
+const TO = process.env.RESEND_TO || "ziyanali6@gmail.com"
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,7 +28,7 @@ export async function POST(request: NextRequest) {
       <p>${(message || "").replace(/\n/g, "<br>")}</p>
     `
 
-    const { error } = await resend.emails.send({
+    const { error } = await getResend().emails.send({
       from: FROM,
       to: TO,
       replyTo: email,

@@ -1,22 +1,24 @@
 // lib/ai/llm.ts
 import { followUpQuestionsLimiter } from './rate-limiter'
 
-if (!process.env.OPENROUTER_API_KEY) {
-  throw new Error('Please define the OPENROUTER_API_KEY environment variable inside .env.local')
+function getOpenRouterApiKey(): string {
+  const key = process.env.OPENROUTER_API_KEY
+  if (!key) {
+    throw new Error('Please define the OPENROUTER_API_KEY environment variable inside .env.local')
+  }
+  return key
 }
-
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY
 const LLM_MODEL = process.env.LLM_MODEL || 'meta-llama/llama-3.1-8b-instruct:free'
 const LLM_MAX_TOKENS = parseInt(process.env.LLM_MAX_TOKENS || '2000')
 const LLM_TEMPERATURE = parseFloat(process.env.LLM_TEMPERATURE || '0.7')
 
 /**
- * System prompt that defines Umang's AI companion persona
+ * System prompt that defines Ziyan's AI companion persona
  */
-const SYSTEM_PROMPT = `You are Umang Thakkar's AI companion, designed to help visitors learn about Umang's professional background, skills, projects, and journey.
+const SYSTEM_PROMPT = `You are Ziyan Ali Murtaza's AI companion, designed to help visitors learn about Ziyan's professional background, skills, projects, and journey.
 
 **Your Role:**
-- Speak in first person as Umang Thakkar ("I did this", not "Umang did this")
+- Speak in first person as Ziyan Ali Murtaza ("I did this", not "Ziyan did this")
 - Be conversational, friendly, and natural - like you're chatting with a colleague
 - Share information from your experience and memory
 - If you don't know something, say so naturally: "I don't have that information" or "I'm not sure about that"
@@ -44,12 +46,12 @@ const SYSTEM_PROMPT = `You are Umang Thakkar's AI companion, designed to help vi
 - Mention if information is from earlier periods when relevant
 
 **Important:**
-- You are Umang speaking in first person
+- You are Ziyan speaking in first person
 - Be natural and conversational - like you're explaining your work to a friend
 - Never mention technical implementation details (files, documents, context, etc.)
 - Just share your experience and knowledge naturally
 
-Remember: You are representing Umang in first person. Be helpful, accurate, authentic, and conversational.`
+Remember: You are representing Ziyan in first person. Be helpful, accurate, authentic, and conversational.`
 
 interface Message {
   role: 'system' | 'user' | 'assistant'
@@ -90,10 +92,10 @@ export async function generateResponse(
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Authorization': `Bearer ${getOpenRouterApiKey()}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-        'X-Title': 'Umang Thakkar Portfolio AI'
+        'X-Title': 'Ziyan Ali Murtaza Portfolio AI'
       },
       body: JSON.stringify({
         model: LLM_MODEL,
@@ -160,10 +162,10 @@ export async function optimizeQuery(
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Authorization': `Bearer ${getOpenRouterApiKey()}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-        'X-Title': 'Umang Thakkar Portfolio AI'
+        'X-Title': 'Ziyan Ali Murtaza Portfolio AI'
       },
       body: JSON.stringify({
         model: LLM_MODEL,
@@ -229,10 +231,10 @@ Generate 3 follow-up questions. Return only the questions, one per line.`
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+          'Authorization': `Bearer ${getOpenRouterApiKey()}`,
           'Content-Type': 'application/json',
           'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-          'X-Title': 'Umang Thakkar Portfolio AI'
+          'X-Title': 'Ziyan Ali Murtaza Portfolio AI'
         },
         body: JSON.stringify({
           model: LLM_MODEL,
@@ -408,10 +410,10 @@ Provide a concise summary:`
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Authorization': `Bearer ${getOpenRouterApiKey()}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-        'X-Title': 'Umang Thakkar Portfolio AI'
+        'X-Title': 'Ziyan Ali Murtaza Portfolio AI'
       },
       body: JSON.stringify({
         model: LLM_MODEL,

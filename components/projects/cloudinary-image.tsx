@@ -103,9 +103,11 @@ export function CloudinaryImage({
 
   // If Cloudinary not configured or using local images, fallback to Next.js Image
   if (!cloudinaryConfigured || (isLocalPath && useFallback)) {
+    // Cloudinary public IDs (e.g. "projects/foo") need a leading "/" for Next.js Image
+    const fallbackSrc = isCloudinaryId ? `/${src}` : src
     return (
       <Image
-        src={src}
+        src={fallbackSrc}
         alt={alt}
         fill={fill}
         priority={priority}

@@ -1,13 +1,17 @@
 // lib/ai/embeddings.ts
 import OpenAI from 'openai'
 
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error('Please define the OPENAI_API_KEY environment variable inside .env.local')
-}
+let _openai: OpenAI | null = null
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+function getOpenAI(): OpenAI {
+  if (!_openai) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('Please define the OPENAI_API_KEY environment variable inside .env.local')
+    }
+    _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  }
+  return _openai
+}
 
 const embeddingModel = process.env.EMBEDDING_MODEL || 'text-embedding-3-small'
 
@@ -22,7 +26,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
       throw new Error('Text cannot be empty for embedding generation')
     }
 
-    const response = await openai.embeddings.create({
+    const response = await getOpenAI().embeddings.create({
       model: embeddingModel,
       input: text,
       encoding_format: 'float',

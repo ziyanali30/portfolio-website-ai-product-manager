@@ -8,11 +8,13 @@ import { MessageBubble } from "./message-bubble"
 import { SuggestedQuestions } from "./suggested-questions"
 import { Send, Loader2, Bot } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { readSSEStream } from "@/lib/ai/stream-reader"
 
 interface Message {
   role: "user" | "assistant"
   content: string
   sources?: string[]
+  id?: number
 }
 
 interface ChatModalProps {
@@ -21,10 +23,10 @@ interface ChatModalProps {
 }
 
 const STARTER_QUESTIONS = [
-  "What did Umang work on at Hunch?",
-  "Tell me about Umang's journey and career decisions",
-  "What technical projects has Umang built?",
-  "What skills has Umang developed from his experiences?",
+  "What does Ziyan work on at Texagon?",
+  "Tell me about Ziyan's experience with RAG systems",
+  "What AI projects has Ziyan built?",
+  "What skills does Ziyan bring as a GenAI engineer?",
 ]
 
 export function ChatModal({ open, onOpenChange }: ChatModalProps) {
@@ -37,6 +39,12 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
   >([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const messageIdCounterRef = useRef(0)
+
+  const getNextMessageId = () => {
+    messageIdCounterRef.current += 1
+    return messageIdCounterRef.current
+  }
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -65,8 +73,11 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
     setIsLoading(true)
     setSuggestedQuestions([])
 
+    const assistantMessageId = getNextMessageId()
+    let fullText = ""
+    setMessages((prev) => [...prev, { role: "assistant", content: "", id: assistantMessageId }])
+
     try {
-      // Call API
       const response = await fetch("/api/ai/query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -80,35 +91,40 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
         throw new Error(`API error: ${response.status}`)
       }
 
-      const data = await response.json()
-
-      // Add AI response to UI
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: data.answer,
-        sources: data.sources,
-      }
-      setMessages((prev) => [...prev, assistantMessage])
-
-      // Update conversation history
-      const updatedHistory = [
-        ...conversationHistory,
-        { role: "user" as const, content: queryText },
-        { role: "assistant" as const, content: data.answer },
-      ]
-      setConversationHistory(updatedHistory)
-
-      // Update suggested questions
-      if (data.suggestedQuestions && data.suggestedQuestions.length > 0) {
-        setSuggestedQuestions(data.suggestedQuestions)
-      }
+      await readSSEStream(response, {
+        onChunk: (content) => {
+          fullText += content
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMessageId ? { ...m, content: fullText } : m
+            )
+          )
+        },
+        onDone: (sq) => {
+          if (sq.length > 0) setSuggestedQuestions(sq)
+          setConversationHistory((prev) => [
+            ...prev,
+            { role: "user" as const, content: queryText },
+            { role: "assistant" as const, content: fullText },
+          ])
+        },
+        onError: (msg) => {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMessageId ? { ...m, content: msg } : m
+            )
+          )
+        },
+      })
     } catch (error) {
       console.error("Error sending message:", error)
-      const errorMessage: Message = {
-        role: "assistant",
-        content: "Sorry, I encountered an error. Please try again.",
-      }
-      setMessages((prev) => [...prev, errorMessage])
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantMessageId
+            ? { ...m, content: "Sorry, I encountered an error. Please try again." }
+            : m
+        )
+      )
     } finally {
       setIsLoading(false)
     }
@@ -146,7 +162,7 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
               <div>
                 <DialogTitle>AI Companion</DialogTitle>
                 <p className="text-sm text-muted-foreground">
-                  Ask me anything about Umang
+                  Ask me anything about Ziyan
                 </p>
               </div>
             </div>
@@ -171,7 +187,7 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
               <div className="text-center space-y-2">
                 <h3 className="text-lg font-semibold">Welcome!</h3>
                 <p className="text-sm text-muted-foreground max-w-md">
-                  I'm Umang's AI companion. I can answer questions about his
+                  I'm Ziyan's AI companion. I can answer questions about his
                   experience, projects, skills, and journey. Try asking me
                   something!
                 </p>
@@ -199,7 +215,7 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
           ) : (
             // Chat Messages
             <div className="space-y-4">
-              {messages.map((message, idx) => (
+              {messages.filter((m) => m.role === "user" || m.content?.trim()).map((message, idx) => (
                 <MessageBubble
                   key={idx}
                   role={message.role}
@@ -208,8 +224,8 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
                 />
               ))}
 
-              {/* Loading Indicator */}
-              {isLoading && (
+              {/* Loading Indicator - hide once streaming content arrives */}
+              {isLoading && !(messages.length > 0 && messages[messages.length - 1].role === "assistant" && messages[messages.length - 1].content?.trim()) && (
                 <div className="flex gap-3">
                   <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center">
                     <Bot className="w-4 h-4 text-muted-foreground" />
@@ -252,7 +268,7 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
               placeholder={
                 isLoading
                   ? "Generating response..."
-                  : "Ask a question about Umang..."
+                  : "Ask a question about Ziyan..."
               }
               disabled={isLoading}
               className="min-h-[60px] max-h-[120px] resize-none"

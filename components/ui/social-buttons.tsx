@@ -1,31 +1,41 @@
-"use client"
+"use client";
 
-import React from "react"
-import { Github, Linkedin, FileText, Mail, MessageCircle, Calendar } from "lucide-react"
-import { motion } from "framer-motion"
-import { useReducedMotion } from "@/hooks/use-reduced-motion"
-import { useSound } from "@/hooks/use-sound"
+import React from "react";
+import {
+  Github,
+  Linkedin,
+  FileText,
+  Mail,
+  MessageCircle,
+  Calendar,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useSound } from "@/hooks/use-sound";
 
 type CommonProps = {
-  className?: string
-  enableSound?: boolean
-}
+  className?: string;
+  enableSound?: boolean;
+};
 
 // LinkedIn button
-export function LinkedInButton({ className = "", enableSound = true }: CommonProps) {
-  const shouldReduceMotion = useReducedMotion()
-  const { play } = useSound()
+export function LinkedInButton({
+  className = "",
+  enableSound = true,
+}: CommonProps) {
+  const shouldReduceMotion = useReducedMotion();
+  const { play } = useSound();
 
   const handleClick = () => {
     if (enableSound && !shouldReduceMotion) {
-      play("click")
+      play("click");
     }
-  }
+  };
 
   if (shouldReduceMotion) {
     return (
       <a
-        href="https://www.linkedin.com/in/umang-thakkar-90a4a5164/"
+        href="https://www.linkedin.com/in/ziyanalimurtaza/"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="LinkedIn"
@@ -38,12 +48,12 @@ export function LinkedInButton({ className = "", enableSound = true }: CommonPro
       >
         <Linkedin className="h-6 w-6 transition-colors group-hover:text-[#0A66C2]" />
       </a>
-    )
+    );
   }
 
   return (
     <motion.a
-      href="https://www.linkedin.com/in/umang-thakkar-90a4a5164/"
+      href="https://www.linkedin.com/in/ziyanalimurtaza/"
       target="_blank"
       rel="noopener noreferrer"
       aria-label="LinkedIn"
@@ -63,24 +73,27 @@ export function LinkedInButton({ className = "", enableSound = true }: CommonPro
     >
       <Linkedin className="h-6 w-6 transition-colors group-hover:text-[#0A66C2]" />
     </motion.a>
-  )
+  );
 }
 
 // GitHub button
-export function GitHubButton({ className = "", enableSound = true }: CommonProps) {
-  const shouldReduceMotion = useReducedMotion()
-  const { play } = useSound()
+export function GitHubButton({
+  className = "",
+  enableSound = true,
+}: CommonProps) {
+  const shouldReduceMotion = useReducedMotion();
+  const { play } = useSound();
 
   const handleClick = () => {
     if (enableSound && !shouldReduceMotion) {
-      play("click")
+      play("click");
     }
-  }
+  };
 
   if (shouldReduceMotion) {
     return (
       <a
-        href="https://github.com/Umang00"
+        href="https://github.com/ziyanali30"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="GitHub"
@@ -94,12 +107,12 @@ export function GitHubButton({ className = "", enableSound = true }: CommonProps
       >
         <Github className="h-6 w-6 transition-transform group-hover:scale-[1.05]" />
       </a>
-    )
+    );
   }
 
   return (
     <motion.a
-      href="https://github.com/Umang00"
+      href="https://github.com/ziyanali30"
       target="_blank"
       rel="noopener noreferrer"
       aria-label="GitHub"
@@ -119,42 +132,45 @@ export function GitHubButton({ className = "", enableSound = true }: CommonProps
     >
       <Github className="h-6 w-6 transition-transform" />
     </motion.a>
-  )
+  );
 }
 
 // Resume button
-export function ResumeButton({ className = "", enableSound = true }: CommonProps) {
-  const shouldReduceMotion = useReducedMotion()
-  const { play } = useSound()
-  const [mounted, setMounted] = React.useState(false)
-  const [resumePath, setResumePath] = React.useState("/resumes/resume-pm.pdf")
-  
+export function ResumeButton({
+  className = "",
+  enableSound = true,
+}: CommonProps) {
+  const shouldReduceMotion = useReducedMotion();
+  const { play } = useSound();
+  const [mounted, setMounted] = React.useState(false);
+  const [resumePath, setResumePath] = React.useState("/resumes/resume-pm.pdf");
+
   // Persona-specific resume paths
   const resumePaths: Record<string, string> = {
     pm: "/resumes/resume-pm.pdf",
     builder: "/resumes/resume-builder.pdf",
     consultant: "/resumes/resume-consultant.pdf",
-  }
-  
+  };
+
   React.useEffect(() => {
-    setMounted(true)
+    setMounted(true);
     // Determine persona on client side only
-    const params = new URLSearchParams(window.location.search)
-    const urlPersona = params.get('persona')
-    let persona = 'pm'
-    if (urlPersona && ['pm', 'builder', 'consultant'].includes(urlPersona)) {
-      persona = urlPersona
+    const params = new URLSearchParams(window.location.search);
+    const urlPersona = params.get("persona");
+    let persona = "pm";
+    if (urlPersona && ["pm", "builder", "consultant"].includes(urlPersona)) {
+      persona = urlPersona;
     } else if (process.env.NEXT_PUBLIC_PERSONA) {
-      persona = process.env.NEXT_PUBLIC_PERSONA
+      persona = process.env.NEXT_PUBLIC_PERSONA;
     }
-    setResumePath(resumePaths[persona] || resumePaths.pm)
-  }, [])
+    setResumePath(resumePaths[persona] || resumePaths.pm);
+  }, []);
 
   const handleClick = () => {
     if (enableSound && !shouldReduceMotion) {
-      play("click")
+      play("click");
     }
-  }
+  };
 
   // Don't render until mounted to avoid hydration mismatch
   if (!mounted) {
@@ -169,7 +185,7 @@ export function ResumeButton({ className = "", enableSound = true }: CommonProps
         <FileText className="h-5 w-5" />
         <span className="text-base font-medium">Resume</span>
       </div>
-    )
+    );
   }
 
   if (shouldReduceMotion) {
@@ -190,7 +206,7 @@ export function ResumeButton({ className = "", enableSound = true }: CommonProps
         <FileText className="h-5 w-5" />
         <span className="text-base font-medium">Resume</span>
       </a>
-    )
+    );
   }
 
   return (
@@ -216,9 +232,8 @@ export function ResumeButton({ className = "", enableSound = true }: CommonProps
       <FileText className="h-5 w-5" />
       <span className="text-base font-medium">Resume</span>
     </motion.a>
-  )
+  );
 }
-
 
 // Email button - icon only version for use inside other buttons
 export function EmailButton({ className = "" }: CommonProps) {
@@ -233,7 +248,7 @@ export function EmailButton({ className = "" }: CommonProps) {
     >
       <Mail className="h-6 w-6 transition-colors text-[#EA4335]" />
     </div>
-  )
+  );
 }
 
 // WhatsApp button - icon only version for use inside other buttons
@@ -249,13 +264,13 @@ export function WhatsAppButton({ className = "" }: CommonProps) {
     >
       <MessageCircle className="h-6 w-6 transition-colors text-[#25D366]" />
     </div>
-  )
+  );
 }
 
 // Calendar button - icon only version for use inside other buttons
-export function CalendarButton({ 
-  className = "", 
-  onClick 
+export function CalendarButton({
+  className = "",
+  onClick,
 }: CommonProps & { onClick?: () => void }) {
   // When onClick is provided, render as a div (for use inside button wrappers)
   // When not provided, render as anchor
@@ -271,9 +286,9 @@ export function CalendarButton({
       >
         <Calendar className="h-6 w-6 transition-colors text-[#006BFF]" />
       </div>
-    )
+    );
   }
-  
+
   return (
     <a
       href="#contact"
@@ -287,5 +302,5 @@ export function CalendarButton({
     >
       <Calendar className="h-6 w-6 transition-colors group-hover:text-[#006BFF]" />
     </a>
-  )
+  );
 }
