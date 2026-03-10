@@ -350,7 +350,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Umang Thakkar**
 
-- Portfolio: https://v0-portfolio-website-one-swart.vercel.app/
+- Portfolio: https://www.ziyanalim.com/
 - LinkedIn: https://www.linkedin.com/in/umang-thakkar-90a4a5164/
 - Email: umangthakkar005@gmail.com
 

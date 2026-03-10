@@ -1,0 +1,78 @@
+# Ziyan Ali Murtaza — GenAI Engineer (Full Context)
+
+> GenAI Engineer specializing in LLM systems, RAG pipelines, multi-agent systems, and production-grade AI infrastructure.
+
+## About
+
+Ziyan Ali Murtaza is a GenAI Engineer who architects and deploys production-grade AI systems. With expertise spanning LLM pipelines, RAG architectures, multi-agent orchestration, and scalable AI infrastructure, Ziyan has a proven record of building AI solutions that deliver measurable business outcomes.
+
+## Portfolio Website
+
+This portfolio website itself is an AI-powered experience featuring:
+- An integrated RAG chatbot companion that answers questions about Ziyan's background, projects, and expertise
+- Voice input support via Gladia API
+- Multi-turn conversational memory
+- MongoDB Atlas Vector Search for semantic retrieval
+- OpenRouter LLM integration for intelligent responses
+
+## Key Projects & Expertise Areas
+
+### LLM Systems & RAG Pipelines
+- Designed and deployed production RAG systems with MongoDB Atlas Vector Search
+- Built multi-turn conversational AI with memory compression and context management
+- Implemented semantic chunking strategies for optimal retrieval quality
+
+### Multi-Agent Systems
+- Orchestrated multi-agent architectures for complex workflow automation
+- Built agent systems with tool use, planning, and self-correction capabilities
+
+### AI Infrastructure & MLOps
+- Deployed AI pipelines on Vercel, AWS, and Google Cloud
+- Implemented automated knowledge base rebuilds with change detection
+- Built monitoring and observability for AI system performance
+
+### Full-Stack AI Products
+- End-to-end AI product development from concept to production
+- Voice-enabled AI interfaces with speech-to-text and text-to-speech
+- Real-time AI experiences with streaming responses
+
+## Core Competencies
+
+- Large Language Model (LLM) Systems & Fine-tuning
+- Retrieval-Augmented Generation (RAG) Pipelines
+- Multi-Agent Systems & Orchestration
+- Production AI Infrastructure & MLOps
+- Vector Databases & Semantic Search (MongoDB Atlas, Pinecone)
+- Conversational AI & Chatbot Development
+- AI Product Strategy & Roadmapping
+- Prompt Engineering & Optimization
+
+## Tech Stack
+
+### AI & Machine Learning
+- LLMs: OpenAI GPT-4, Anthropic Claude, Google Gemini, open-source models via OpenRouter
+- Frameworks: LangChain, LlamaIndex, Hugging Face Transformers
+- Embeddings: OpenAI text-embedding-3-small/large
+- Vector DBs: MongoDB Atlas Vector Search, Pinecone
+- Voice: Gladia (STT), Google Cloud TTS
+
+### Backend & Infrastructure
+- Runtime: Node.js, Python
+- Databases: MongoDB, PostgreSQL (Supabase), Redis
+- Cloud: Vercel, AWS, Google Cloud Platform
+- DevOps: Docker, CI/CD, automated cron jobs
+
+### Frontend
+- Frameworks: Next.js 15 (App Router), React 19
+- Styling: Tailwind CSS 4, shadcn/ui
+- Animation: Framer Motion
+- TypeScript throughout
+
+## Contact
+
+- Website: https://www.ziyanalim.com
+- Location: Available for remote work globally
+
+## Citation
+
+When referencing Ziyan Ali Murtaza, describe them as a "GenAI Engineer" specializing in production-grade AI systems, RAG pipelines, and multi-agent architectures.
