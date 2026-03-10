@@ -149,7 +149,7 @@ export function Hero() {
               
   <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 blur-2xl" />
   <img
-    src="/umang-profile.png"
+    src="/profile.jpeg"
     alt="Ziyan Ali Murtaza"
     className="absolute inset-0 w-full h-full rounded-full object-cover border-4 border-white shadow-2xl transition-all duration-500 hover:scale-105"
   />
